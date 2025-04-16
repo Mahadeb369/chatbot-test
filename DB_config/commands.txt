@@ -1,0 +1,10 @@
+# build the image
+docker build -t chatbot_postgres .
+
+# create and run a container
+docker run -d \
+  --name chatbot_postgres_container \
+  -e POSTGRES_PASSWORD=chatbot_password \
+  -p 5439:5432 \
+  -v /h1/Anjul/times-ooh/chatbot-v1/DB_config:chatbot_postgres_data \
+  chatbot_postgres

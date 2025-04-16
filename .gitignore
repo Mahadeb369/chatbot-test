@@ -1,0 +1,7 @@
+uploads
+saved_csv
+static
+.cache
+__pycache__
+.env
+keys.json

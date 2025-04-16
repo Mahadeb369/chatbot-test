@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advertising Query System</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f4f7f9;
+        color: #333;
+      }
+
+      .navbar {
+        background-color: #343a40;
+        height: 8vh;
+      }
+
+      .navbar-brand {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: white;
+      }
+
+      /* main container */
+      .container-main {
+        display: flex;
+        flex-direction: row-reverse;
+        height: 92vh;
+      }
+
+      /* file upload section */
+      .container-file-upload {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex: 20%;
+        /* background: #d1d4d6; */
+        background: white;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      #upload-container {
+        padding: 10px;
+      }
+
+      #file-records {
+        overflow-y: auto;
+        padding: 10px;
+      }
+
+      /* chatbot section */
+      .container-chatbot {
+        flex: 80%;
+        max-width: 80%;
+      }
+
+      .chat-container {
+        max-height: 84%;
+        overflow-y: auto;
+        margin: 0px 85px;
+        /* background: white; */
+        /* box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1); */
+        padding: 15px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        scrollbar-width: none;
+        /* height: 70vh; */
+      }
+
+      .message {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        word-wrap: break-word;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .user-message {
+        background: #007bff;
+        color: white;
+        align-self: flex-end;
+        max-width: 75%;
+      }
+
+      .bot-message {
+        background: #e9ecef;
+        align-self: flex-start;
+        max-width: 100%;
+      }
+
+      .bot-img {
+        max-width: 70%;
+        border-radius: 0.6rem;
+      }
+
+      .loading-message {
+        color: gray;
+        font-style: italic;
+      }
+
+      .loading-previous-message {
+        color: gray;
+        text-align: center;
+        margin: 35vh auto;
+        font-size: large;
+      }
+
+      .chat-box {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: space-between;
+        align-items: end;
+        gap: 10px;
+        position: fixed;
+        bottom: 10px;
+        width: 70%;
+        margin: 0px auto;
+        right: 4.5%;
+        /* transform: translateX(-50%); */
+        /* height: 20%; */
+      }
+
+      .message-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 10px;
+        flex: 75%;
+      }
+
+      #files {
+        display: none; /* Hide the default file input */
+      }
+
+      .custom-upload {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .custom-upload i {
+        margin-right: 8px;
+      }
+
+      .custom-upload:hover {
+        background: #0056b3;
+      }
+
+      .button {
+        padding: 10px 15px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-wrap: nowrap;
+      }
+
+      .button:disabled {
+        background-color: #007bff;
+        cursor: not-allowed;
+      }
+
+      .chat-box button:hover {
+        background-color: #218838;
+      }
+
+      .error-box {
+        color: red;
+        font-weight: bold;
+        margin-top: 20px;
+      }
+
+      .message-heading {
+        font-size: 1rem;
+        margin-bottom: 0px;
+      }
+
+      .download-btn {
+        margin-top: 10px;
+        padding: 7px 10px;
+        border: none;
+        background-color: #28a745;
+        color: white;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: small;
+      }
+
+      /* Table styles */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+        text-wrap: nowrap;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        /* font-size: 10px; */
+      }
+
+      .table-container {
+        overflow: scroll;
+        padding: 0px 10px;
+        margin-top: 7px;
+        max-height: 300px;
+        border: #017bfe 1px solid;
+        border-radius: 5px;
+        font-size: 10px;
+        text-wrap: nowrap;
+      }
+
+      #user_prompt {
+        width: 91%;
+        min-height: 4rem;
+        max-height: 5rem;
+        padding: 0.3rem 0.5rem;
+      }
+
+      /* #cache-btn{
+      background-color: #B3251E !important;
+      text-wrap: nowrap;
+    } */
+
+      /* #files{
+      width: 20%;
+    } */
+
+      .record {
+        text-decoration: none;
+        color: #000;
+      }
+      .record p {
+        margin-bottom: 2px;
+        font-size: 13px;
+      }
+
+      .heading {
+        font-size: 1.2rem;
+        font-weight: bold;
+        padding: 10px;
+        margin-bottom: 5px;
+        text-align: center;
+        border-bottom: 2px solid #007bff;
+      }
+
+      .upload-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: end;
+        gap: 6px;
+        overflow: hidden;
+      }
+
+      .timestamp {
+        font-size: 12px;
+        color: rgb(146, 144, 144);
+        margin-bottom: 0px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid justify-content-center">
+        <a class="navbar-brand" href="/">Sales Assistant</a>
+      </div>
+    </nav>
+
+    <div class="container-main">
+      <div class="container-chatbot">
+        <div class="chat-container" id="chat-box">
+          {% if previous_chats %} {% for chat in previous_chats %}
+          <div class="message user-message">{{ chat['query'] }}</div>
+          <div class="message bot-message">{{ chat['response']|safe }}</div>
+          {% endfor %} {% endif %}
+        </div>
+
+        <div class="chat-box">
+          <div class="message-container">
+            <!-- <input type="text" id="user_prompt" name="user_prompt" placeholder="How can I assist you?" required> -->
+            <textarea
+              id="user_prompt"
+              name="user_prompt"
+              placeholder="How can I assist you?"
+              required
+            ></textarea>
+            <button class="button" id="send-btn">
+              <i class="fas fa-paper-plane"></i> Send
+            </button>
+            <!-- <button id="cache-btn"><i class="fas fa-trash"></i> Clear cache</button> -->
+          </div>
+        </div>
+      </div>
+
+      <div class="container-file-upload">
+        <h4 class="heading">List of Uploaded Files</h4>
+        <div class="upload-section">
+          <ul id="file-records" class="list-group list-group-numbered"></ul>
+
+          <div id="upload-container">
+            <label for="files" class="custom-upload button">
+              <i class="fas fa-upload"></i> Upload File
+            </label>
+            <input
+              type="file"
+              name="files"
+              id="files"
+              multiple
+              accept=".csv, .xlsx"
+              required
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let isMessageLoading = false;
+
+      const downloadUrlTemplate =
+        "{{ url_for('download_file', filename='__FILENAME__') }}";
+      document
+        .getElementById("send-btn")
+        .addEventListener("click", sendMessage);
+      // document.getElementById("cache-btn").addEventListener("click", clearCache);
+      document
+        .getElementById("files")
+        .addEventListener("change", function (event) {
+          const files = event.target.files;
+          if (files.length > 0) {
+            startUpload(files);
+          }
+        });
+
+      // essential elements for chat box
+      const orderdList = document.getElementById("file-records");
+      const chatBox = document.getElementById("chat-box");
+      const sendBtn = document.getElementById("send-btn");
+
+      // Function to clear cache
+      function clearCache() {
+        fetch("{{ url_for('clear_memory') }}", {
+          method: "POST",
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Server returned an error: " + response.status);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            console.log("Data: ", data);
+            chatBox.innerHTML += `
+          <div class='message user-message'>
+            <strong>Cache cleared successfully!</strong>
+          </div>
+        `;
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            document.getElementById(
+              "chat-box"
+            ).innerHTML += `<div class='message bot-message error-box'>⚠️ ${error.message}</div>`;
+          });
+      }
+
+      document
+        .getElementById("user_prompt")
+        .addEventListener("keydown", function (event) {
+          if (event.key === "Enter") {
+            event.preventDefault(); // Prevent form submission or unintended behaviors
+            document.getElementById("send-btn").click(); // Simulate button click
+          }
+        });
+
+      // Function to generate UUID as a session ID
+      function generateUUID() {
+        // Generates a UUID v4 string
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+          /[xy]/g,
+          function (c) {
+            const r = (Math.random() * 16) | 0;
+            const v = c === "x" ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+          }
+        );
+      }
+
+      function getSessionID() {
+        let sessionId = sessionStorage.getItem("session_id");
+        if (!sessionId) {
+          sessionId = generateUUID();
+          sessionStorage.setItem("session_id", sessionId);
+        }
+        return sessionId;
+      }
+
+      // Function to send message to the server
+      function sendMessage() {
+        const userPrompt = document.getElementById("user_prompt").value.trim();
+
+        if (!chatBox) {
+          // Safety check
+          console.error("Chat box element not found!");
+          return;
+        }
+
+        if (userPrompt === "") return;
+
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Sending...`;
+        document.getElementById("user_prompt").value = "";
+
+        // Add user message using DOM methods
+        const userMsg = document.createElement("div");
+        userMsg.className = "message user-message";
+        userMsg.textContent = userPrompt;
+        chatBox.appendChild(userMsg);
+
+        // Add loading message
+        const loadingMsg = document.createElement("div");
+        loadingMsg.className = "message bot-message loading-message";
+        loadingMsg.textContent = "⏳ Processing your request...";
+        chatBox.appendChild(loadingMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Check or create a session ID unique to the tab
+        const sessionId = getSessionID();
+
+        fetch("{{ url_for('chat') }}", {
+          method: "POST",
+          body: new URLSearchParams({
+            session_id: sessionId,
+            user_prompt: userPrompt,
+          }),
+        })
+          .then((res) => {
+            if (!res.ok) {
+              // console.log("Server returned an error:", res);
+              // Return both status and JSON parsing promise
+              return res.json().then((errorData) => {
+                throw { status: res.status, errorData }; // Throw custom error object
+              });
+            }
+            return res.json();
+          })
+          .then((response) => {
+            chatBox.removeChild(loadingMsg); // Remove loading message
+
+            console.log("Response from gpt: ", response);
+
+            if (response?.error) {
+              const errorMsg = document.createElement("div");
+              errorMsg.className = "message bot-message";
+              errorMsg.textContent =
+                "Something went wrong. Please try again later.";
+              chatBox.appendChild(errorMsg);
+              return;
+            }
+
+            if (response?.images?.length == 0) {
+              chatBox.innerHTML += `
+            <div class='message bot-message'>
+              <p class="mb-0">There are no result in the previous reaponse.</p>
+            </div>`;
+              return;
+            }
+
+            if (response?.images && response?.images?.length !== 0) {
+              response.images.forEach((image) => {
+                chatBox.innerHTML += `
+              <div class='message bot-message'>
+                <img src='${image}' alt='Image' class="bot-img">
+              </div>`;
+              });
+              return;
+            }
+
+            console.log("Response length: ", response?.length);
+            response.map((item) => {
+              if (item.data.length === 0) {
+                // chatBox.innerHTML += `<div class='message bot-message'>No results found</div>`;
+                chatBox.innerHTML += `<div class='message bot-message'>${
+                  item.heading ? item.heading : "No results found"
+                }</div>`;
+              } else {
+                let selectedColumns = [
+                  "site",
+                  "property",
+                  "site_details",
+                  "rate_card",
+                  "location",
+                  "sub_location",
+                  "landMark",
+                  "sitetype_info",
+                  "status",
+                  "package_name",
+                  "campaign_start_date",
+                  "campaign_end_date",
+                  "advance_book_start_date",
+                  "advance_book_end_date",
+                ];
+                const responseKeys = Object.keys(item.data[0]);
+                // Add any missing keys from responseKeys into selectedColumns
+                selectedColumns = [
+                  ...new Set([...selectedColumns, ...responseKeys]),
+                ];
+                // console.log("Selected Columns: ", selectedColumns);
+
+                const columns = selectedColumns.filter((col) =>
+                  Object.keys(item.data[0]).includes(col)
+                );
+                // const columns = Object.keys(response.data[0])
+
+                let tableHTML = `
+              <table>
+                <thead>
+                  <tr>
+                    ${columns
+                      .map((col) => `<th>${col.toUpperCase()}</th>`)
+                      .join("")}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${item.data
+                    .map(
+                      (item) => `
+                    <tr>
+                      ${columns
+                        .map(
+                          (col) => `
+                      <td>
+                        ${
+                          item[col] !== null
+                            ? !isNaN(item[col]) && item[col] !== ""
+                              ? Number(item[col]) % 1 === 0
+                                ? Number(item[col]) // Show integer as is
+                                : parseFloat(item[col]).toFixed(2) // Show float with 2 decimals
+                              : item[col]
+                            : "N/A"
+                        }
+                      </td>
+                      `
+                        )
+                        .join("")}
+                    </tr>
+                  `
+                    )
+                    .join("")}
+                </tbody>
+              </table>
+            `;
+
+                const downloadUrl = downloadUrlTemplate.replace(
+                  "__FILENAME__",
+                  item.csv_filename
+                );
+
+                chatBox.innerHTML += `
+              <div class='message bot-message'>
+                ${
+                  item.heading
+                    ? `<h4 class='message-heading'>${item.heading}</h4>`
+                    : "Here is your result"
+                }
+                <div>
+                  <div class='table-container'>${tableHTML}</div>
+                  <a href="${downloadUrl}" download>
+                    <button class="download-btn">Download as CSV</button>
+                  </a>  
+                </div>
+                ${
+                  item.images
+                    ? item.images
+                        .map(
+                          (image) =>
+                            `<img src='${image}' alt='Image' class="bot-img">`
+                        )
+                        .join("")
+                    : ""
+                }
+              </div>
+            `;
+              }
+            });
+          })
+          .catch((error) => {
+            console.log("Error:", error);
+            chatBox.removeChild(loadingMsg);
+            const errorMsg = document.createElement("div");
+            errorMsg.className = "message bot-message";
+
+            if (error.status === 400) {
+              errorMsg.textContent = `${error.errorData.error}`;
+            } else {
+              errorMsg.textContent =
+                "Something went wrong. Please try again later.";
+            }
+            chatBox.appendChild(errorMsg);
+          })
+          .finally(() => {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = `<i class="fas fa-paper-plane"></i> Send`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+          });
+      }
+
+      // Function to upload files
+      function startUpload(files) {
+        let formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+          formData.append("user_files", files[i]);
+        }
+
+        // Replace input with loading animation
+        const uploadContainer = document.getElementById("upload-container");
+        uploadContainer.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> uploading..';
+
+        fetch("{{ url_for('index') }}", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Upload successful:", data);
+
+            // Restore input field after successful upload
+            // Replace loader with success message
+            uploadContainer.innerHTML =
+              '<div class="success-message">✅ Files uploaded successfully!</div>';
+
+            data.processed_files_details.forEach((file) => {
+              // get uploading file name without using fetchUploadedFiles
+              const orderdList = document.getElementById("file-records");
+              const downloadUrl = downloadUrlTemplate.replace(
+                "__FILENAME__",
+                file.file_name
+              );
+
+              // Check if the file already exists in the list
+              const existingItem = Array.from(orderdList.children).find(
+                (item) => {
+                  return (
+                    item.children[0].children[0].textContent.trim() ===
+                    file.file_name.trim()
+                  );
+                }
+              );
+
+              if (existingItem) {
+                existingItem.remove();
+              }
+
+              const list = `
+            <li class="list-group-item d-flex bg-transparent border border-0">
+              <div class="ms-2 me-auto">
+                <a class="record" href=${downloadUrl} >
+                  <p>${file.file_name}</p>
+                </a>
+                <p class="timestamp">${file.uploaded_at}</p>
+              </div>
+            </li>
+          `;
+              orderdList.innerHTML += list;
+            });
+
+            // Restore input after 2 seconds
+            setTimeout(() => {
+              uploadContainer.innerHTML = `
+            <div>
+              <label for="files" class="custom-upload button">
+                <i class="fas fa-upload"></i> Upload File
+              </label>
+              <input type="file" name="files" id="files" multiple accept=".csv, .xlsx" required>
+            </div>
+          `;
+              document
+                .getElementById("files")
+                .addEventListener("change", function (event) {
+                  const files = event.target.files;
+                  if (files.length > 0) {
+                    startUpload(files);
+                  }
+                });
+            }, 2000);
+          })
+          .catch((error) => {
+            console.error("Error uploading files:", error);
+            uploadContainer.innerHTML =
+              '<div style="font-style:black"> ❌ Error uploading files. Please try again.!</div>';
+
+            // Restore input field in case of error
+            uploadContainer.innerHTML =
+              '<input type="file" name="files" id="files" multiple accept=".csv, .xlsx" required>';
+            document
+              .getElementById("files")
+              .addEventListener("change", function (event) {
+                const files = event.target.files;
+                if (files.length > 0) {
+                  startUpload(files);
+                }
+              });
+
+            // Restore input after 2 seconds
+            setTimeout(() => {
+              uploadContainer.innerHTML = `
+            <div>
+              <label for="files" class="custom-upload button">
+                <i class="fas fa-upload"></i> Upload File
+              </label>
+              <input type="file" name="files" id="files" multiple accept=".csv, .xlsx" required>
+            </div>
+          `;
+              document
+                .getElementById("files")
+                .addEventListener("change", function (event) {
+                  const files = event.target.files;
+                  if (files.length > 0) {
+                    startUpload(files);
+                  }
+                });
+            }, 1000);
+          });
+      }
+
+      function fetchUploadedFiles() {
+        fetch("{{ url_for('uploaded_files') }}")
+          .then((response) => response.json())
+          .then((data) => {
+            orderdList.innerHTML = "";
+
+            data.forEach((record) => {
+              const encodedFileName = encodeURIComponent(record.file_name); // Encode spaces and special chars
+              const downloadUrl = downloadUrlTemplate.replace(
+                "__FILENAME__",
+                encodedFileName
+              );
+
+              const list = `
+              <li class="list-group-item d-flex bg-transparent border border-0">
+                <div class="ms-2 me-auto">
+                  <a class="record" href=${downloadUrl} >
+                   <p>${record.file_name}</p>
+                  </a>
+                  <p class="timestamp">${record.uploaded_at}</p>
+                </div>
+              </li>
+            `;
+              orderdList.innerHTML += list;
+            });
+          })
+          .catch((error) => console.error("Error fetching data:", error))
+          .finally(() => {
+            orderdList.scrollTop = orderdList.scrollHeight;
+          });
+      }
+      fetchUploadedFiles();
+
+      function getPreviousMessages() {
+        isMessageLoading = true;
+        const sessionId = getSessionID();
+        const baseUrl =
+          "{{ url_for('get_messages', session_id='__placeholder__') }}";
+        const url = baseUrl.replace("__placeholder__", sessionId);
+
+        if (isMessageLoading) {
+          chatBox.innerHTML += `<div class='loading-previous-message'> <i class="fas fa-spinner fa-spin"></i> Loading your messages...</div>`;
+          sendBtn.disabled = true;
+        }
+
+        fetch(url)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Previous chats: ", data);
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML = "";
+            data.forEach((chat) => {
+              if (chat.type === "Human") {
+                chatBox.innerHTML += `
+                <div class='message user-message'>${chat.content}</div>
+              `;
+              }
+
+              if (chat.type === "AI") {
+                isMessageLoading = false;
+                // handelAImessage(chat.content, chatBox);
+                chat.content.forEach((item) => {
+                  if (item.data.length === 0) {
+                    // chatBox.innerHTML += `<div class='message bot-message'>No results found</div>`;
+                    chatBox.innerHTML += `
+                    <div class='message bot-message'>
+                      ${item?.heading}
+                      ${
+                        item.images
+                          ? item.images
+                              .map(
+                                (image) =>
+                                  `<img src='${image}' alt='Image' class="bot-img">`
+                              )
+                              .join("")
+                          : ""
+                      }
+                    </div>
+                  `;
+                  } else {
+                    let selectedColumns = [
+                      "site",
+                      "property",
+                      "site_details",
+                      "rate_card",
+                      "location",
+                      "sub_location",
+                      "landMark",
+                      "sitetype_info",
+                      "status",
+                      "package_name",
+                      "campaign_start_date",
+                      "campaign_end_date",
+                      "advance_book_start_date",
+                      "advance_book_end_date",
+                    ];
+                    const responseKeys = Object.keys(item.data[0]);
+                    // Add any missing keys from responseKeys into selectedColumns
+                    selectedColumns = [
+                      ...new Set([...selectedColumns, ...responseKeys]),
+                    ];
+                    // console.log("Selected Columns: ", selectedColumns);
+
+                    const columns = selectedColumns.filter((col) =>
+                      Object.keys(item.data[0]).includes(col)
+                    );
+                    // const columns = Object.keys(response.data[0])
+
+                    let tableHTML = `
+                    <table>
+                      <thead>
+                        <tr>
+                          ${columns
+                            .map((col) => `<th>${col.toUpperCase()}</th>`)
+                            .join("")}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${item.data
+                          .map(
+                            (item) => `
+                          <tr>
+                            ${columns
+                              .map(
+                                (col) => `
+                            <td>
+                              ${
+                                item[col] !== null
+                                  ? !isNaN(item[col]) && item[col] !== ""
+                                    ? Number(item[col]) % 1 === 0
+                                      ? Number(item[col]) // Show integer as is
+                                      : parseFloat(item[col]).toFixed(2) // Show float with 2 decimals
+                                    : item[col]
+                                  : "N/A"
+                              }
+                            </td>
+                            `
+                              )
+                              .join("")}
+                          </tr>
+                        `
+                          )
+                          .join("")}
+                      </tbody>
+                    </table>
+                  `;
+
+                    const downloadUrl = downloadUrlTemplate.replace(
+                      "__FILENAME__",
+                      item.csv_filename
+                    );
+
+                    chatBox.innerHTML += `
+                    <div class='message bot-message'>
+                      ${
+                        item.heading
+                          ? `<h4 class='message-heading'>${item.heading}</h4>`
+                          : "Here is your result"
+                      }
+                      <div>
+                        <div class='table-container'>${tableHTML}</div>
+                        <a href="${downloadUrl}" download>
+                          <button class="download-btn">Download as CSV</button>
+                        </a>  
+                      </div>
+                      ${
+                        item.images
+                          ? item.images
+                              .map(
+                                (image) =>
+                                  `<img src='${image}' alt='Image' class="bot-img">`
+                              )
+                              .join("")
+                          : ""
+                      }
+                    </div>
+                  `;
+                  }
+                });
+              }
+            });
+          })
+          .catch((error) => console.error("Error fetching data:", error))
+          .finally(() => {
+            sendBtn.disabled = false;
+            chatBox.scrollTop = chatBox.scrollHeight;
+          });
+      }
+      getPreviousMessages();
+    </script>
+  </body>
+</html>

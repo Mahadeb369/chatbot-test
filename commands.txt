@@ -1,0 +1,16 @@
+docker build -t chatbot_image .
+
+docker run -d -v /h1/Anjul/times-ooh/chatbot-v1:/app -p 2150:2150 --name chatbot_container chatbot_image
+
+docker logs -f chatbot_container
+
+docker exec -it chatbot_container bash
+
+# db migration
+flask db init (only first time)
+
+flask db migrate -m "your migration name"
+
+flask db upgrade
+
+flask db downgrade (If you need to revert the last migration)
