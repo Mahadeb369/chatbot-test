@@ -159,3 +159,4 @@ youtube-dl==2021.12.17
 youtube-transcript-api==0.6.2
 zipp==3.19.2
 zstandard==0.23.0
+gunicorn==21.2.0
